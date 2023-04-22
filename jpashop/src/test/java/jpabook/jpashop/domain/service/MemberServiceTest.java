@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Transactional
+@Transactional // 테스트 끝나면 알아서 Rollback 시켜줌
 public class MemberServiceTest {
 
     @Autowired
@@ -28,7 +28,7 @@ public class MemberServiceTest {
     EntityManager em;
 
     @Test
-    public void join() throws Exception{
+    public void join() throws Exception {
         //given
         Member member = new Member();
         member.setName("Son");
@@ -38,11 +38,11 @@ public class MemberServiceTest {
 
         //then
         em.flush();
-        assertEquals(member,memberRepository.findOne(saveId));
+        assertEquals(member, memberRepository.findOne(saveId));
     }
 
-    @Test
-    public void checkDuplicateJoin() throws Exception{
+    @Test(expected = IllegalStateException.class)
+    public void checkDuplicateJoin() throws Exception {
         //given
         Member member1 = new Member();
         member1.setName("son");
@@ -52,7 +52,13 @@ public class MemberServiceTest {
         //when
         memberService.join(member1);
         memberService.join(member2); // 예외가 발생해야한다
-
+/*
+        try {
+            memberService.join(member2); // 예외가 발생해야한다
+        }catch (IllegalStateException e){
+            return;
+        }
+*/
         //then
         fail("에외가 발생해야 한다.");
     }
